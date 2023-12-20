@@ -25,7 +25,7 @@ public class ClientService {
     }
 
     public Client update(Long clientId, Client client) {
-        if (existsById(clientId)) {
+        if (!existsById(clientId)) {
             throw new NotFoundException("Client with id " + clientId + " does not exist");
         }
         client.setId(clientId);

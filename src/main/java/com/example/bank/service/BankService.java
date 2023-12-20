@@ -22,7 +22,7 @@ public class BankService {
     }
 
     public Bank update(Long bankId, Bank bank) {
-        if (existsById(bankId)) {
+        if (!existsById(bankId)) {
             throw new NotFoundException("Bank with id " + bank + " does not exist");
         }
         bank.setId(bankId);
