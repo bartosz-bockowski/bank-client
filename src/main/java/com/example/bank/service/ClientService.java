@@ -28,6 +28,7 @@ public class ClientService {
         if (!existsById(clientId)) {
             throw new NotFoundException("Client with id " + clientId + " does not exist");
         }
+        client.setBalance(findById(clientId).getBalance());
         client.setId(clientId);
         return clientRepository.save(client);
     }
