@@ -3,7 +3,6 @@ package com.example.bank.controller;
 import com.example.bank.command.BankCommand;
 import com.example.bank.domain.Bank;
 import com.example.bank.dto.BankDTO;
-import com.example.bank.exception.NotFoundException;
 import com.example.bank.service.BankService;
 import com.example.bank.service.ClientService;
 import lombok.RequiredArgsConstructor;
@@ -47,12 +46,9 @@ public class BankController {
 
     @PutMapping("/{bankId}")
     public ResponseEntity<BankDTO> update(@PathVariable Long bankId, @Valid @RequestBody BankCommand bankCommand) {
-        if (!bankService.existsById(bankId)) {
-            throw new NotFoundException("Bank with id " + bankId + " does not exists");
-        }
-        Bank bank = modelMapper.map(bankCommand, Bank.class);
-        bank.setId(bankId);
-        return new ResponseEntity<>(modelMapper.map(bankService.save(bank), BankDTO.class), HttpStatus.OK);
+        return new ResponseEntity<>(modelMapper
+                .map(bankService.update(
+                        bankId, modelMapper.map(bankCommand, Bank.class)), BankDTO.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{bankId}")

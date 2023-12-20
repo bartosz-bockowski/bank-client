@@ -21,6 +21,14 @@ public class BankService {
         return bankRepository.save(bank);
     }
 
+    public Bank update(Long bankId, Bank bank) {
+        if (existsById(bankId)) {
+            throw new NotFoundException("Bank with id " + bank + " does not exist");
+        }
+        bank.setId(bankId);
+        return bankRepository.save(bank);
+    }
+
     public List<Bank> findAll() {
         return bankRepository.findAll();
     }

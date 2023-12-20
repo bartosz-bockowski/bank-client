@@ -2,16 +2,13 @@ package com.example.bank.controller;
 
 import com.example.bank.command.CashTransferCommand;
 import com.example.bank.command.ClientCommand;
-import com.example.bank.config.Config;
 import com.example.bank.domain.Client;
 import com.example.bank.dto.CashTransferDTO;
 import com.example.bank.dto.ClientDTO;
-import com.example.bank.exception.NotFoundException;
 import com.example.bank.service.CashTransferService;
 import com.example.bank.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +27,6 @@ public class ClientController {
     private final ModelMapper modelMapper;
 
     private final CashTransferService cashTransferService;
-
-    private final RabbitTemplate rabbitTemplate;
 
     @PostMapping
     public ResponseEntity<ClientDTO> save(@Valid @RequestBody ClientCommand clientCommand) {
@@ -56,12 +51,9 @@ public class ClientController {
     @PutMapping("/{clientId}")
     public ResponseEntity<ClientDTO> update(@PathVariable Long clientId,
                                             @Valid @RequestBody ClientCommand clientCommand) {
-        if (!clientService.existsById(clientId)) {
-            throw new NotFoundException("Client with id " + clientId + " does not exist");
-        }
-        Client client = modelMapper.map(clientCommand, Client.class);
-        client.setId(clientId);
-        return new ResponseEntity<>(modelMapper.map(clientService.save(client), ClientDTO.class), HttpStatus.OK);
+        return new ResponseEntity<>(modelMapper
+                .map(clientService.update(
+                        clientId, modelMapper.map(clientCommand, Client.class)), ClientDTO.class), HttpStatus.OK);
     }
 
     @DeleteMapping("/{clientId}")
@@ -87,13 +79,9 @@ public class ClientController {
         CashTransferDTO cashTransferDTO = modelMapper.map(
                 cashTransferService.createAndSave(
                         clientService.subtractMoneyAndSave(clientId, cashTransferCommand.getValue()),
-                        cashTransferCommand.getDestinationAccountNumber(),
-                        cashTransferCommand.getValue()
+                        cashTransferCommand
                 ),
                 CashTransferDTO.class);
-
-        rabbitTemplate.convertAndSend(Config.QUEUE_NAME, cashTransferDTO);
-
         return new ResponseEntity<>(cashTransferDTO, HttpStatus.OK);
     }
 

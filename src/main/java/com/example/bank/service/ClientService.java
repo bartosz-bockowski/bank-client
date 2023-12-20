@@ -24,6 +24,14 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
+    public Client update(Long clientId, Client client) {
+        if (existsById(clientId)) {
+            throw new NotFoundException("Client with id " + clientId + " does not exist");
+        }
+        client.setId(clientId);
+        return clientRepository.save(client);
+    }
+
     public List<Client> findAll() {
         return clientRepository.findAll();
     }
